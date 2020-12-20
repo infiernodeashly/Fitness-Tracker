@@ -1,4 +1,6 @@
 // get all workout data from back-end
+//added 2 new functions to: 1. prevent exercises in same workout from being applied to different days. 
+//2. keep pie chart legend display and toggle functionality for all exercises completed.
 
 fetch("/api/workouts/range")
   .then(response => {
@@ -11,8 +13,8 @@ fetch("/api/workouts/range")
 
 API.getWorkoutsInRange()
 
-  function generatePalette() {
-    const arr = [
+function generatePalette() {
+  const arr = [
     "#003f5c",
     "#2f4b7c",
     "#665191",
@@ -32,10 +34,16 @@ API.getWorkoutsInRange()
   ]
 
   return arr;
-  }
+}
 function populateChart(data) {
+  //pulls total exercise duration for the day to display on line chart.
   let durations = duration(data);
+  //pulls individual exercise durations to display in the pie chart legend
+  let durationPiece = durationP(data);
+  //pulls total exercise weight lifted for the day to display on bar chart.
   let pounds = calculateTotalWeight(data);
+  //pulls individual exercise weight lifted to display in the pie2 chart legend
+  let poundsPiece = poundsP(data);
   let workouts = workoutNames(data);
   const colors = generatePalette();
 
@@ -61,6 +69,7 @@ function populateChart(data) {
           label: "Workout Duration In Minutes",
           backgroundColor: "red",
           borderColor: "red",
+          //data = total workout duration for the day for line chart
           data: durations,
           fill: false
         }
@@ -153,7 +162,8 @@ function populateChart(data) {
         {
           label: "Excercises Performed",
           backgroundColor: colors,
-          data: durations
+          //data = individual workout duration for pie chart legend
+          data: durationPiece,
         }
       ]
     },
@@ -173,7 +183,8 @@ function populateChart(data) {
         {
           label: "Excercises Performed",
           backgroundColor: colors,
-          data: pounds
+          //data = individual workout weight lifted for pie2 chart legend
+          data: poundsPiece
         }
       ]
     },
@@ -185,30 +196,62 @@ function populateChart(data) {
     }
   });
 }
-
+// total exercise duration for the day for line chart
 function duration(data) {
   let durations = [];
 
   data.forEach(workout => {
+    let sumDuration = 0;
     workout.exercises.forEach(exercise => {
-      durations.push(exercise.duration);
+      sumDuration += exercise.duration;
     });
+    workout.totalDuration = sumDuration;
+    durations.push(sumDuration);
   });
-
   return durations;
 }
 
+// individual exercise duration for the day for pie chart legend
+function durationP(data) {
+  let durationPiece = [];
+
+  data.forEach(workout => {
+    workout.exercises.forEach(exercise => {
+      durationPiece.push(exercise.duration);
+    });
+  });
+
+  return durationPiece;
+}
+
+// total exercise weight lifted for the day for line chart
 function calculateTotalWeight(data) {
   let total = [];
 
   data.forEach(workout => {
+    let sumPounds = 0;
     workout.exercises.forEach(exercise => {
-      total.push(exercise.weight);
+      sumPounds += exercise.weight;
+    });
+    workout.totalWeight = sumPounds;
+    total.push(sumPounds);
+  });
+  return total;
+}
+
+// individual exercise weight lifted for the day for pie2 chart legend
+function poundsP(data) {
+  let poundsPiece = [];
+
+  data.forEach(workout => {
+    workout.exercises.forEach(exercise => {
+      poundsPiece.push(exercise.weight);
     });
   });
 
-  return total;
+  return poundsPiece;
 }
+
 
 function workoutNames(data) {
   let workouts = [];
@@ -218,6 +261,6 @@ function workoutNames(data) {
       workouts.push(exercise.name);
     });
   });
-  
+
   return workouts;
 }
