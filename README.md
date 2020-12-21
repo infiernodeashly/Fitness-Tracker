@@ -1,6 +1,6 @@
 # Fitness Tracker 
 
-Repository: https://github.com/infiernodeashly/Fitness-Tracker
+Repository: https://github.com/infiernodeashly/Fitness-Tracker <br />
 URL: https://damp-reaches-93345.herokuapp.com/
   
 ## Description 
